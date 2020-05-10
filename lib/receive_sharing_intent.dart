@@ -10,9 +10,12 @@ class ReceiveSharingIntent {
       const EventChannel("receive_sharing_intent/events-media");
   static const EventChannel _eChannelLink =
       const EventChannel("receive_sharing_intent/events-text");
+  static const EventChannel _eChannelApplink =
+      const EventChannel("receive_sharing_intent/events-applink");
 
   static Stream<List<SharedMediaFile>> _streamMedia;
   static Stream<String> _streamLink;
+  static Stream<String> _streamApplink;
 
   /// Returns a [Future], which completes to one of the following:
   ///
@@ -36,6 +39,14 @@ class ReceiveSharingIntent {
   ///   * a [PlatformException], if the invocation failed in the platform plugin.
   static Future<String> getInitialText() async {
     return await _mChannel.invokeMethod('getInitialText');
+  }
+
+  /// Returns a [Future], which completes to one of the following:
+  ///
+  ///   * the initially stored applink (possibly null), on successful invocation;
+  ///   * a [PlatformException], if the invocation failed in the platform plugin.
+  static Future<String> getInitialApplink() async {
+    return await _mChannel.invokeMethod('getInitialApplink');
   }
 
   /// A convenience method that returns the initially stored link
@@ -109,6 +120,30 @@ class ReceiveSharingIntent {
       _streamLink = _eChannelLink.receiveBroadcastStream("text").cast<String>();
     }
     return _streamLink;
+  }
+
+  /// Sets up a broadcast stream for receiving incoming applink change events.
+  ///
+  /// Returns a broadcast [Stream] which emits events to listeners as follows:
+  ///
+  ///   * a decoded data ([String]) event (possibly null) for each successful
+  ///   event received from the platform plugin;
+  ///   * an error event containing a [PlatformException] for each error event
+  ///   received from the platform plugin.
+  ///
+  /// Errors occurring during stream activation or deactivation are reported
+  /// through the `FlutterError` facility. Stream activation happens only when
+  /// stream listener count changes from 0 to 1. Stream deactivation happens
+  /// only when stream listener count changes from 1 to 0.
+  ///
+  /// If the app was started by a link intent or user activity the stream will
+  /// not emit that initial one - query either the `getInitialApplink` instead.
+  static Stream<String> getApplinkStream() {
+    if (_streamApplink == null) {
+      _streamApplink =
+          _eChannelApplink.receiveBroadcastStream("applink").cast<String>();
+    }
+    return _streamApplink;
   }
 
   /// A convenience transformation of the stream to a `Stream<Uri>`.
