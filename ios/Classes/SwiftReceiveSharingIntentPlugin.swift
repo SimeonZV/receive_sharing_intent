@@ -19,7 +19,7 @@ public class SwiftReceiveSharingIntentPlugin: NSObject, FlutterPlugin, FlutterSt
 
     private var eventSinkMedia: FlutterEventSink? = nil;
     private var eventSinkText: FlutterEventSink? = nil;
-    
+    private var eventSinkApplink: FlutterEventSink? = nil;
     
     public static func register(with registrar: FlutterPluginRegistrar) {
         let instance = SwiftReceiveSharingIntentPlugin()
